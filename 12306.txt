@@ -1,0 +1,53 @@
+//以下代码在谷歌、火狐等带有控制台的浏览器中运行（360或搜狗浏览器在极速模式下右键->审查元素->console）
+//1.提前选好乘车人、车次和席别，并勾选自动提交
+//2.获取验证码: https://kyfw.12306.cn/otn/passcodeNew/getPassCodeNew.do?module=login&rand=sjrand
+//3.将验证码替换下面的yzma,检测验证码是否正确：https://kyfw.12306.cn/otn/passcodeNew/checkRandCodeAnsyn?rand=sjrand&randCode=yzma
+var yzm = 'yzma';//验证码，5分钟过期，建议刷票前一两分钟填入
+var sj = 500;//刷新时间：500为半秒一次，1000为一秒一次
+var i,cc;
+var refreshImg2 = refreshImg;
+refreshImg = function(a,b,c){ return true }//验证码过滤
+var timer = setInterval(function(){
+    $('#query_ticket').removeClass('btn-disabled').click();
+    $('a.btn72').each(function(){
+        cc = $(this).parent().parent().find('.train a').html();
+        //检测车次
+        for(i=0;i<ccSelected.length;i++){
+            if(cc == ccSelected[i] && check_num($(this))){
+                clearInterval(timer);
+                setTimeout(function(){
+                    $('#randCode, #randCode2').val(yzm);
+                    $('#randCode2').keyup();
+                    refreshImg = refreshImg2;
+                }, sj);
+                return false;
+            }
+        }
+    });
+}, sj);
+
+//循环刷新
+window.setTimeout2 = window.setTimeout;
+window.setTimeout = function(f, t){
+    if(t == 5000) window.setTimeout2(f, sj);
+    else window.setTimeout2(f, t);
+}
+
+//检测席别
+function check_num(obj){
+    var j,id,text;
+    var rs=false;
+    obj.parent().siblings(":gt(0)").each(function(){
+        id = $(this).parent().attr('id').substring(6);
+        text = $(this).text();
+        if(text!='--' && text!='无'){
+            for(j=0;j<xbChecked.length;j++){
+                if(xbChecked[j]+id == $(this).attr('id')){
+                    rs = true
+                    return false;
+                }
+            }
+        }
+    })
+    return rs;
+}
